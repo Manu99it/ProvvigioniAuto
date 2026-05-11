@@ -35,3 +35,15 @@ Per eseguire il progetto localmente, è necessario disporre di:
    ```bash
    npm run build:android
    ```
+
+## Open Source & Ringraziamenti
+
+Questo progetto è reso possibile grazie allo straordinario ecosistema open-source. Tra le principali librerie utilizzate troviamo:
+
+- **[React](https://react.dev/) & [Vite](https://vitejs.dev/)**: Per l'interfaccia utente e l'infrastruttura di build velocissima.
+- **[Tailwind CSS](https://tailwindcss.com/)**: Per lo styling flessibile, rapido e responsivo.
+- **[Capacitor](https://capacitorjs.com/)**: Per il porting nativo dell'applicazione web su piattaforma Android.
+- **[Recharts](https://recharts.org/)**: Per la renderizzazione dei grafici statistici e comparativi.
+- **[jsPDF](https://parall.ax/products/jspdf) & [html-to-image](https://github.com/bubkoo/html-to-image)**: Per la complessa generazione ed esportazione multipagina dei report in formato PDF.
+- **[SheetJS (xlsx)](https://sheetjs.com/)**: Per l'esportazione pulita e nativa dei dati in fogli di calcolo Excel.
+- **[Lucide React](https://lucide.dev/) & [Framer Motion](https://www.framer.com/motion/)**: Per l'iconografia elegante e le animazioni fluide dell'interfaccia utente.
