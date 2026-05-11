@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Provvigioni</string>
+    <string name="title_activity_main">Provvigioni</string>
+    <string name="package_name">com.emanu.provvigioniauto</string>
+    <string name="custom_url_scheme">com.emanu.provvigioniauto</string>
+</resources>

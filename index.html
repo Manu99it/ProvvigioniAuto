@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Provvigioni" />
+    <meta name="apple-mobile-web-app-title" content="Provvigioni" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>Provvigioni</title>
+    <style>
+      body, html { background-color: #f0f9ff; }
+      html.dark, html.dark body { background-color: #082f49 !important; }
+    </style>
+    <script>
+      try {
+        var isDark = false;
+        var appMode = localStorage.getItem('app_dark_mode');
+        var useSystem = localStorage.getItem('app_use_system_theme');
+        if (useSystem === 'false') {
+          isDark = appMode === 'true';
+        } else {
+          isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+
