@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.emanu.provvigioniauto"
+    namespace = "it.ema99.provvigioni"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.emanu.provvigioniauto"
+        applicationId "it.ema99.provvigioni"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

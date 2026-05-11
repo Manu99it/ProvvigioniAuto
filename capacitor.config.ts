@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.emanu.provvigioniauto',
+  appId: 'it.ema99.provvigioni',
   appName: 'Provvigioni',
   webDir: 'dist',
   plugins: {

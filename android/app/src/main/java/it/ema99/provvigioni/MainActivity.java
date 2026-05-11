@@ -1,4 +1,4 @@
-package com.emanu.provvigioniauto;
+package it.ema99.provvigioni;
 
 import android.graphics.Color;
 import android.os.Bundle;
