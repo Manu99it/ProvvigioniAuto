@@ -25,6 +25,7 @@ import { parseCommissionPDF, type DDTRecord } from './services/pdfService';
 import { calculateCommissionFromRecords } from './domain/commissions';
 import { DEFAULT_SETTINGS, ITALIAN_MONTHS, extractMonthFromFilename } from './constants';
 import type { AppSettings, HistoryEntry, Screen } from './types';
+import { loadHistory, saveHistory } from './storage/historyStorage';
 import NavButton from './components/NavButton';
 import { scrollPositionsCache } from './components/ScrollRestorer';
 import AnalysisScreen from './screens/AnalysisScreen';
@@ -55,17 +56,8 @@ export default function App() {
     return saved === null ? true : saved === 'true';
   });
 
-  const [history, setHistory] = useState<HistoryEntry[]>(() => {
-    const saved = localStorage.getItem('app_history');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return [];
-      }
-    }
-    return [];
-  });
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   
   const [profileImage, setProfileImage] = useState<string | null>(() => {
     return localStorage.getItem('app_profile_image');
@@ -116,8 +108,24 @@ export default function App() {
   }, [settings]);
 
   useEffect(() => {
-    localStorage.setItem('app_history', JSON.stringify(history));
-  }, [history]);
+    let isMounted = true;
+
+    loadHistory().then((loadedHistory) => {
+      if (!isMounted) return;
+      setHistory(loadedHistory);
+      setIsHistoryLoaded(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isHistoryLoaded) {
+      saveHistory(history);
+    }
+  }, [history, isHistoryLoaded]);
 
   useEffect(() => {
     localStorage.setItem('app_personal_info', JSON.stringify(personalInfo));
@@ -171,7 +179,7 @@ export default function App() {
 
   // Load latest chronological month from history on mount if no current analysis
   useEffect(() => {
-    if (ddtRecords.length === 0 && history.length > 0) {
+    if (isHistoryLoaded && ddtRecords.length === 0 && history.length > 0) {
       const sortedHistory = [...history].sort((a, b) => {
         if (a.year !== b.year) return b.year - a.year;
         const indexA = ITALIAN_MONTHS.indexOf(a.monthName.toLowerCase());
@@ -187,7 +195,7 @@ export default function App() {
         setHasData(true);
       }
     }
-  }, []); // Run once on startup
+  }, [ddtRecords.length, history, isHistoryLoaded]);
 
   // Theme states
   
