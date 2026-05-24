@@ -286,9 +286,9 @@ export default function App() {
     localStorage.setItem('app_use_system_theme', useSystemTheme.toString());
   }, [useSystemTheme]);
 
-  // Hide the native splash only after the app has painted a stable first frame.
+  // Hide the startup cover only after the app has painted a stable first frame.
   useEffect(() => {
-    if (!Capacitor.isNativePlatform() || !isHistoryLoaded || hasHiddenSplash.current) {
+    if (!isHistoryLoaded || hasHiddenSplash.current) {
       return;
     }
 
@@ -296,7 +296,14 @@ export default function App() {
     const hideAfterPaint = window.setTimeout(() => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          SplashScreen.hide({ fadeOutDuration: 250 }).catch(() => {});
+          const startupCover = document.getElementById('app-startup-cover');
+          if (startupCover) {
+            startupCover.dataset.hiding = 'true';
+            window.setTimeout(() => startupCover.remove(), 220);
+          }
+          if (Capacitor.isNativePlatform()) {
+            SplashScreen.hide({ fadeOutDuration: 0 }).catch(() => {});
+          }
         });
       });
     }, 80);

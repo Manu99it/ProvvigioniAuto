@@ -9,10 +9,11 @@ const config: CapacitorConfig = {
       overlaysWebView: true,
     },
     SplashScreen: {
+      launchShowDuration: 0,
       launchAutoHide: false,
       splashFullScreen: true,
       splashImmersive: true,
-      launchFadeOutDuration: 500,
+      launchFadeOutDuration: 0,
     },
   },
 };
