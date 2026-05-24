@@ -1,5 +1,6 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { parseItalianCurrency } from '../utils/currency';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
@@ -19,18 +20,6 @@ export interface DDTRecord {
   imponibileTotal: number;
   italianoTotal: number;
 }
-
-/**
- * Normalizes Italian currency string to number
- */
-function parseCurrency(str: string): number {
-  if (!str) return 0;
-  // Remove dots as thousands separators and spaces, convert comma to dot
-  const normalized = str.trim().replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
-  const val = parseFloat(normalized);
-  return isNaN(val) ? 0 : val;
-}
-
 
 export async function parseCommissionPDF(
   file: File, 
@@ -132,7 +121,7 @@ export async function parseCommissionPDF(
         const actualDate = ddtDate || new Date().toLocaleDateString('it-IT');
       
       const totalMatch = segment.match(totalRegex);
-      const imponibileTotal = totalMatch ? Math.round(parseCurrency(totalMatch[1]) * 100) / 100 : 0;
+      const imponibileTotal = totalMatch ? Math.round(parseItalianCurrency(totalMatch[1]) * 100) / 100 : 0;
       
       const items: CommissionItem[] = [];
       const lines = segment.split('\n');
@@ -146,8 +135,8 @@ export async function parseCommissionPDF(
         if (itemMatch) {
           const code = itemMatch[1].trim();
           const desc = itemMatch[2].trim();
-          const qty = parseCurrency(itemMatch[4]);
-          const price = parseCurrency(itemMatch[5]);
+          const qty = parseItalianCurrency(itemMatch[4]);
+          const price = parseItalianCurrency(itemMatch[5]);
           const total = Math.round(qty * price * 100) / 100;
           
           if (total > 0.05) {
@@ -188,7 +177,7 @@ export async function parseCommissionPDF(
       if (finalImponibile === 0) {
           const currencyMatches = segment.match(/[\d]{1,9},\d{2}/g);
           if (currencyMatches && currencyMatches.length > 0) {
-              finalImponibile = Math.round(parseCurrency(currencyMatches[currencyMatches.length - 1]) * 100) / 100;
+              finalImponibile = Math.round(parseItalianCurrency(currencyMatches[currencyMatches.length - 1]) * 100) / 100;
           }
       }
 

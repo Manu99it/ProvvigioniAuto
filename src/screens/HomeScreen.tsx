@@ -10,6 +10,11 @@ import type { AppSettings, HistoryEntry } from '../types';
 import { ITALIAN_MONTHS } from '../constants';
 import ScrollRestorer from '../components/ScrollRestorer';
 import { triggerDownload } from '../utils/download';
+import {
+  calculateCommissionFromRecords,
+  sumImponibileTotal,
+  sumItalianTotal
+} from '../domain/commissions';
 
 export default function HomeScreen({ hasData, records, settings, history, monthName, year, onLoadEntry }: { 
   hasData: boolean; 
@@ -44,15 +49,10 @@ export default function HomeScreen({ hasData, records, settings, history, monthN
     }
   }, [history.length, hasScrolled]);
 
-  const totItalianoRaw = records.reduce((acc, r) => acc + r.italianoTotal, 0);
-  const totItaliano = Math.round(totItalianoRaw * 100) / 100;
-  
-  const totGeneraleRaw = records.reduce((acc, r) => acc + (r.imponibileTotal || 0), 0);
-  const totGenerale = Math.round(totGeneraleRaw * 100) / 100;
-  
-  // Logic: (Sum Italian - Deduction%) * Commission%
-  const afterDiscount = totItaliano * (1 - (settings.deductionRate / 100));
-  const monthlyCommission = Math.round(afterDiscount * (settings.commissionRate / 100) * 100) / 100;
+  const totItaliano = sumItalianTotal(records);
+  const totGenerale = sumImponibileTotal(records);
+  const commissionDetails = calculateCommissionFromRecords(records, settings);
+  const monthlyCommission = commissionDetails.commission;
 
   // Prepare History Chart Data (Bar Chart)
   const historyChartData = history
@@ -73,10 +73,7 @@ export default function HomeScreen({ hasData, records, settings, history, monthN
       // Recalculate commission based on CURRENT settings if records exist, otherwise use saved commission
       let recalculatedCommission = entry.commission || 0;
       if (entry.records && entry.records.length > 0) {
-        const italianSumRaw = entry.records.reduce((acc, r) => acc + r.italianoTotal, 0);
-        const italianSum = Math.round(italianSumRaw * 100) / 100;
-        const afterDiscountEntry = italianSum * (1 - (settings.deductionRate / 100));
-        recalculatedCommission = Math.round(afterDiscountEntry * (settings.commissionRate / 100) * 100) / 100;
+        recalculatedCommission = calculateCommissionFromRecords(entry.records, settings).commission;
       }
       
       return {
@@ -140,9 +137,8 @@ export default function HomeScreen({ hasData, records, settings, history, monthN
     if (!hasData || records.length === 0) return;
     
     const doc = new jsPDF();
-    const afterDiscount = totItaliano * (1 - (settings.deductionRate / 100));
-    const finalAfterDiscount = Math.round(afterDiscount * 100) / 100;
-    const scorporoValue = Math.round((totItaliano - finalAfterDiscount) * 100) / 100;
+    const finalAfterDiscount = commissionDetails.netItalian;
+    const scorporoValue = commissionDetails.deductionAmount;
 
     // Header
     doc.setFontSize(22);

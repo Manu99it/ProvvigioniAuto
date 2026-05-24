@@ -9,6 +9,7 @@ import { ITALIAN_MONTHS } from '../constants';
 import type { AppSettings, HistoryEntry } from '../types';
 import ScrollRestorer from '../components/ScrollRestorer';
 import { triggerDownload } from '../utils/download';
+import { calculateCommissionFromRecords } from '../domain/commissions';
 
 export default function ChartsScreen({ history, settings }: { history: HistoryEntry[]; settings: AppSettings; key?: React.Key }) {
   const chart1Ref = useRef<HTMLDivElement>(null);
@@ -315,10 +316,7 @@ export default function ChartsScreen({ history, settings }: { history: HistoryEn
       });
       
       if (entry) {
-        const italianSumRaw = (entry.records || []).reduce((acc, r) => acc + (r.italianoTotal || 0), 0);
-        const italianSum = Math.round(italianSumRaw * 100) / 100;
-        const afterDiscountEntry = italianSum * (1 - (settings.deductionRate / 100));
-        const commission = Math.round(afterDiscountEntry * (settings.commissionRate / 100) * 100) / 100;
+        const commission = calculateCommissionFromRecords(entry.records || [], settings).commission;
         row[year] = Math.round(commission);
       } else {
         row[year] = 0;

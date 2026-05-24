@@ -22,6 +22,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { NavigationBar } from '@capgo/capacitor-navigation-bar';
 import { parseCommissionPDF, type DDTRecord } from './services/pdfService';
+import { calculateCommissionFromRecords } from './domain/commissions';
 import { DEFAULT_SETTINGS, ITALIAN_MONTHS, extractMonthFromFilename } from './constants';
 import type { AppSettings, HistoryEntry, Screen } from './types';
 import NavButton from './components/NavButton';
@@ -314,9 +315,7 @@ export default function App() {
 
             if (!isMounted) break;
 
-            const totItaliano = results.reduce((acc, r) => acc + r.italianoTotal, 0);
-            const afterDiscount = totItaliano * (1 - (settings.deductionRate / 100));
-            const commission = afterDiscount * (settings.commissionRate / 100);
+            const commissionDetails = calculateCommissionFromRecords(results, settings);
             
             let monthName = extractMonthFromFilename(file.name); 
             let year = new Date().getFullYear();
@@ -342,8 +341,8 @@ export default function App() {
               year,
               fileName: file.name,
               records: results,
-              totalItalian: totItaliano,
-              commission: commission,
+              totalItalian: commissionDetails.totalItalian,
+              commission: commissionDetails.commission,
               timestamp: Date.now()
             };
 
