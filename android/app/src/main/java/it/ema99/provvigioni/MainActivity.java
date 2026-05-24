@@ -6,20 +6,33 @@ import android.webkit.WebView;
 import android.view.Window;
 import android.view.WindowManager;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
-    private int getLaunchBackgroundColor() {
+    private boolean isNightMode() {
         int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
-        if (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+        return nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    private int getLaunchBackgroundColor() {
+        if (isNightMode()) {
             return Color.rgb(8, 47, 73);
         }
         return Color.rgb(240, 249, 255);
     }
 
+    private void applySystemBarIconStyle(Window window) {
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(!isNightMode());
+        controller.setAppearanceLightNavigationBars(!isNightMode());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(getLaunchBackgroundColor()));
+        Window launchWindow = getWindow();
+        launchWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(getLaunchBackgroundColor()));
+        applySystemBarIconStyle(launchWindow);
         super.onCreate(savedInstanceState);
 
         Window window = getWindow();
@@ -27,6 +40,7 @@ public class MainActivity extends BridgeActivity {
         // Abilita edge-to-edge per la navbar trasparente
         WindowCompat.setDecorFitsSystemWindows(window, false);
         window.setNavigationBarColor(Color.TRANSPARENT);
+        applySystemBarIconStyle(window);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             window.setNavigationBarContrastEnforced(false);
         }
