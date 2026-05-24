@@ -1,8 +1,5 @@
-import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { parseItalianCurrency } from '../utils/currency';
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
 export interface CommissionItem {
   code: string;
@@ -37,6 +34,9 @@ export async function parseCommissionPDF(
   }
 
   if (onProgress) onProgress(5);
+  const pdfjsLib = await import('pdfjs-dist');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
+
   const arrayBuffer = await file.arrayBuffer();
   if (onProgress) onProgress(10);
   

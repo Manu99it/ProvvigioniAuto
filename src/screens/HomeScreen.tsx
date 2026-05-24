@@ -1,10 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Award, Download, FileText, MoreHorizontal, Percent, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 import type { DDTRecord } from '../services/pdfService';
 import type { AppSettings, HistoryEntry } from '../types';
 import { ITALIAN_MONTHS } from '../constants';
@@ -15,16 +11,9 @@ import {
   sumImponibileTotal,
   sumItalianTotal
 } from '../domain/commissions';
+import type { HomeTrendChartPoint } from '../components/HomeTrendChart';
 
-interface TooltipPayloadEntry {
-  value: number;
-}
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: TooltipPayloadEntry[];
-  label?: string | number;
-}
+const HomeTrendChart = lazy(() => import('../components/HomeTrendChart'));
 
 export default function HomeScreen({ hasData, records, settings, history, monthName, year, onLoadEntry }: { 
   hasData: boolean; 
@@ -136,7 +125,7 @@ export default function HomeScreen({ hasData, records, settings, history, monthN
   }
 
   // Chart data: trend of italianoTotal and totale per DDT
-  const chartData = records.map(r => ({
+  const chartData: HomeTrendChartPoint[] = records.map(r => ({
     name: r.number,
     nostrano: r.italianoTotal,
     totale: r.imponibileTotal,
@@ -146,6 +135,10 @@ export default function HomeScreen({ hasData, records, settings, history, monthN
   const handleExportPDF = async () => {
     if (!hasData || records.length === 0) return;
     
+    const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable')
+    ]);
     const doc = new jsPDF();
     const finalAfterDiscount = commissionDetails.netItalian;
     const scorporoValue = commissionDetails.deductionAmount;
@@ -226,6 +219,7 @@ export default function HomeScreen({ hasData, records, settings, history, monthN
 
   const handleExportExcel = async () => {
     if (!hasData || records.length === 0) return;
+    const XLSX = await import('xlsx');
     
     // Create the main data rows
     const data = records.map(r => {
@@ -260,37 +254,6 @@ export default function HomeScreen({ hasData, records, settings, history, monthN
     const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const excelBlob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     await triggerDownload(excelBlob, `Registro_Vendite_${monthName}_${year}.xlsx`);
-  };
-
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-    if (active && payload && payload.length >= 2) {
-      return (
-        <div className="bg-white dark:bg-sky-900 p-4 rounded-2xl shadow-2xl border border-sky-100 dark:border-sky-800 space-y-3 min-w-[180px]">
-          <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-sky-800 pb-2">DDT n. {label}</p>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-sky-500" />
-                <span className="text-[10px] font-bold text-sky-500 uppercase">Nostrano</span>
-              </div>
-              <span className="text-sm font-black text-sky-600 dark:text-sky-400">
-                € {payload[1].value.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="flex justify-between items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-600" />
-                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight">Totale</span>
-              </div>
-              <span className="text-sm font-black text-slate-600 dark:text-slate-300">
-                € {payload[0].value.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
@@ -390,46 +353,9 @@ export default function HomeScreen({ hasData, records, settings, history, monthN
               <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/10 px-2 py-1 rounded-lg">Trend</span>
             </div>
             <div className="h-40 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData.length > 0 ? chartData : [{ name: '', nostrano: 0, totale: 0, date: '' }]}>
-                  <defs>
-                    <linearGradient id="colorNostrano" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0d9488" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#0d9488" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorTotale" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0284c7" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#0284c7" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis 
-                    dataKey="name" 
-                    hide 
-                  />
-                  <YAxis 
-                    hide 
-                    domain={['dataMin', 'dataMax']}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area 
-                    type="monotone" 
-                    dataKey="totale" 
-                    stroke="#0284c7" 
-                    strokeWidth={2}
-                    fillOpacity={1} 
-                    fill="url(#colorTotale)" 
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="nostrano" 
-                    stroke="#0d9488" 
-                    strokeWidth={3}
-                    fillOpacity={1} 
-                    fill="url(#colorNostrano)" 
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <Suspense fallback={<div className="h-full w-full rounded-xl bg-sky-50/60 dark:bg-sky-950/40" />}>
+                <HomeTrendChart data={chartData} />
+              </Suspense>
             </div>
           </div>
         </div>

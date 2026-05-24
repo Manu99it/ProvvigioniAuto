@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
   History,
   Home as HomeIcon,
@@ -29,10 +29,11 @@ import { loadHistory, saveHistory } from './storage/historyStorage';
 import NavButton from './components/NavButton';
 import { scrollPositionsCache } from './components/ScrollRestorer';
 import AnalysisScreen from './screens/AnalysisScreen';
-import ChartsScreen from './screens/ChartsScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import HomeScreen from './screens/HomeScreen';
 import SettingsScreen from './screens/SettingsScreen';
+
+const ChartsScreen = lazy(() => import('./screens/ChartsScreen'));
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -734,11 +735,12 @@ export default function App() {
             />
           )}
           {currentScreen === 'charts' && (
-            <ChartsScreen 
-              key="charts"
-              history={history}
-              settings={settings}
-            />
+            <Suspense key="charts" fallback={<div className="min-h-[50vh]" />}>
+              <ChartsScreen
+                history={history}
+                settings={settings}
+              />
+            </Suspense>
           )}
           {currentScreen === 'analysis' && (
             <AnalysisScreen 

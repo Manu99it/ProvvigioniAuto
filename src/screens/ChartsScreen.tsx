@@ -2,9 +2,6 @@ import React, { useRef, useState } from 'react';
 import { BarChart3, Download, RotateCcw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { toPng } from 'html-to-image';
 import { ITALIAN_MONTHS } from '../constants';
 import type { AppSettings, HistoryEntry } from '../types';
 import ScrollRestorer from '../components/ScrollRestorer';
@@ -48,6 +45,11 @@ export default function ChartsScreen({ history, settings }: { history: HistoryEn
     // Give more time for the hidden charts to render properly
     setTimeout(async () => {
       try {
+        const [{ jsPDF }, { default: autoTable }, { toPng }] = await Promise.all([
+          import('jspdf'),
+          import('jspdf-autotable'),
+          import('html-to-image')
+        ]);
         const doc = new jsPDF('p', 'mm', 'a4');
         let currentY = 20;
 
