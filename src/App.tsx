@@ -88,6 +88,7 @@ export default function App() {
   const [currentYearDisplay, setCurrentYearDisplay] = useState<number>(new Date().getFullYear());
   const [isFabVisible, setIsFabVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const hasHiddenSplash = useRef(false);
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     const saved = localStorage.getItem('app_settings');
@@ -285,14 +286,23 @@ export default function App() {
     localStorage.setItem('app_use_system_theme', useSystemTheme.toString());
   }, [useSystemTheme]);
 
-  // Hide Splash Screen manually after React mounts to prevent any white flash
+  // Hide the native splash only after the app has painted a stable first frame.
   useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      setTimeout(() => {
-        SplashScreen.hide().catch(() => {});
-      }, 150);
+    if (!Capacitor.isNativePlatform() || !isHistoryLoaded || hasHiddenSplash.current) {
+      return;
     }
-  }, []);
+
+    hasHiddenSplash.current = true;
+    const hideAfterPaint = window.setTimeout(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          SplashScreen.hide({ fadeOutDuration: 250 }).catch(() => {});
+        });
+      });
+    }, 80);
+
+    return () => window.clearTimeout(hideAfterPaint);
+  }, [isHistoryLoaded]);
 
   // Handle analysis when entering the analysis screen
   useEffect(() => {

@@ -5,14 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Provvigioni" />
     <meta name="apple-mobile-web-app-title" content="Provvigioni" />
     <link rel="manifest" href="/manifest.json" />
     <title>Provvigioni</title>
     <style>
-      body, html { background-color: #f0f9ff; }
-      html.dark, html.dark body { background-color: #082f49 !important; }
+      html, body, #root {
+        min-height: 100%;
+        background-color: #f0f9ff;
+      }
+      body {
+        margin: 0;
+      }
+      html.dark, html.dark body, html.dark #root {
+        background-color: #082f49 !important;
+      }
     </style>
     <script>
       try {
@@ -27,6 +36,7 @@
         if (isDark) {
           document.documentElement.classList.add('dark');
         }
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#112b42' : '#ffffff');
       } catch (e) {}
     </script>
   </head>
