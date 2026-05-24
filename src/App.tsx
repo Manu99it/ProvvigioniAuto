@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Capacitor } from '@capacitor/core';
-import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { NavigationBar } from '@capgo/capacitor-navigation-bar';
 import { parseCommissionPDF, type DDTRecord } from './services/pdfService';
@@ -88,7 +87,7 @@ export default function App() {
   const [currentYearDisplay, setCurrentYearDisplay] = useState<number>(new Date().getFullYear());
   const [isFabVisible, setIsFabVisible] = useState(true);
   const lastScrollY = useRef(0);
-  const hasHiddenSplash = useRef(false);
+  const hasRevealedApp = useRef(false);
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     const saved = localStorage.getItem('app_settings');
@@ -286,29 +285,22 @@ export default function App() {
     localStorage.setItem('app_use_system_theme', useSystemTheme.toString());
   }, [useSystemTheme]);
 
-  // Hide the startup cover only after the app has painted a stable first frame.
+  // Reveal the app only after it has painted a stable first frame.
   useEffect(() => {
-    if (!isHistoryLoaded || hasHiddenSplash.current) {
+    if (!isHistoryLoaded || hasRevealedApp.current) {
       return;
     }
 
-    hasHiddenSplash.current = true;
-    const hideAfterPaint = window.setTimeout(() => {
+    hasRevealedApp.current = true;
+    const revealAfterPaint = window.setTimeout(() => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const startupCover = document.getElementById('app-startup-cover');
-          if (startupCover) {
-            startupCover.dataset.hiding = 'true';
-            window.setTimeout(() => startupCover.remove(), 220);
-          }
-          if (Capacitor.isNativePlatform()) {
-            SplashScreen.hide({ fadeOutDuration: 0 }).catch(() => {});
-          }
+          document.documentElement.classList.add('app-ready');
         });
       });
     }, 80);
 
-    return () => window.clearTimeout(hideAfterPaint);
+    return () => window.clearTimeout(revealAfterPaint);
   }, [isHistoryLoaded]);
 
   // Handle analysis when entering the analysis screen
