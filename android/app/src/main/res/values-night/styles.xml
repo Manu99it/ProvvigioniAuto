@@ -13,13 +13,11 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
-    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+    <style name="AppTheme.NoActionBarLaunch" parent="Base.AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="windowSplashScreenBackground">@color/backgroundColor</item>
         <item name="android:windowBackground">@color/backgroundColor</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 
 </resources>
