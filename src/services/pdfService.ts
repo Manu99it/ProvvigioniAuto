@@ -21,6 +21,11 @@ export interface DDTRecord {
   italianoTotal: number;
 }
 
+interface PdfTextItem {
+  str: string;
+  transform: number[];
+}
+
 export async function parseCommissionPDF(
   file: File, 
   onProgress?: (progress: number) => void,
@@ -46,7 +51,7 @@ export async function parseCommissionPDF(
     const textContent = await page.getTextContent();
     
     // Sort items by position to maintain logical reading order (y descending, then x ascending)
-    const items = textContent.items as any[];
+    const items = textContent.items as PdfTextItem[];
     items.sort((a, b) => {
       const yDiff = b.transform[5] - a.transform[5];
       if (Math.abs(yDiff) < 5) return a.transform[4] - b.transform[4];

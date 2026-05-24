@@ -24,7 +24,7 @@ import { NavigationBar } from '@capgo/capacitor-navigation-bar';
 import { parseCommissionPDF, type DDTRecord } from './services/pdfService';
 import { calculateCommissionFromRecords } from './domain/commissions';
 import { DEFAULT_SETTINGS, ITALIAN_MONTHS, extractMonthFromFilename } from './constants';
-import type { AppSettings, HistoryEntry, Screen } from './types';
+import type { AppSettings, HistoryEntry, PersonalInfo, Screen } from './types';
 import { loadHistory, saveHistory } from './storage/historyStorage';
 import NavButton from './components/NavButton';
 import { scrollPositionsCache } from './components/ScrollRestorer';
@@ -63,7 +63,7 @@ export default function App() {
     return localStorage.getItem('app_profile_image');
   });
 
-  const [personalInfo, setPersonalInfo] = useState(() => {
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>(() => {
     const saved = localStorage.getItem('app_personal_info');
     if (saved) {
       try {

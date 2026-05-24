@@ -11,6 +11,23 @@ import ScrollRestorer from '../components/ScrollRestorer';
 import { triggerDownload } from '../utils/download';
 import { calculateCommissionFromRecords } from '../domain/commissions';
 
+type MonthlyChartRow = { month: string } & Record<number, number>;
+type ExportTableRow = string[];
+
+interface TooltipPayloadEntry {
+  color?: string;
+  fill?: string;
+  name?: string;
+  value: number;
+}
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadEntry[];
+  label?: string | number;
+  title: string;
+}
+
 export default function ChartsScreen({ history, settings }: { history: HistoryEntry[]; settings: AppSettings; key?: React.Key }) {
   const chart1Ref = useRef<HTMLDivElement>(null);
   const chart2Ref = useRef<HTMLDivElement>(null);
@@ -86,7 +103,7 @@ export default function ChartsScreen({ history, settings }: { history: HistoryEn
           currentY += 115;
           
           const provvigioniRows = ITALIAN_MONTHS.map((m, idx) => {
-            const row: any[] = [m.toUpperCase()];
+            const row: ExportTableRow = [m.toUpperCase()];
             years.forEach(y => {
               const val = monthlyCommissionData[idx][y] || 0;
               row.push(`€${val.toLocaleString('it-IT')}`);
@@ -120,7 +137,7 @@ export default function ChartsScreen({ history, settings }: { history: HistoryEn
           currentY += 115;
           
           const nostranoRows = ITALIAN_MONTHS.map((m, idx) => {
-            const row: any[] = [m.toUpperCase()];
+            const row: ExportTableRow = [m.toUpperCase()];
             years.forEach(y => {
               const val = monthlyItalianData[idx][y] || 0;
               row.push(`€${val.toLocaleString('it-IT')}`);
@@ -154,7 +171,7 @@ export default function ChartsScreen({ history, settings }: { history: HistoryEn
           currentY += 115;
           
           const venditaRows = ITALIAN_MONTHS.map((m, idx) => {
-            const row: any[] = [m.toUpperCase()];
+            const row: ExportTableRow = [m.toUpperCase()];
             years.forEach(y => {
               const val = monthlyTotalData[idx][y] || 0;
               row.push(`€${val.toLocaleString('it-IT')}`);
@@ -181,13 +198,13 @@ export default function ChartsScreen({ history, settings }: { history: HistoryEn
     }, 500);
   };
 
-  const ChartTooltip = ({ active, payload, label, title }: any) => {
+  const ChartTooltip = ({ active, payload, label, title }: ChartTooltipProps) => {
     if (active && payload && payload.length > 0) {
       return (
         <div className="bg-white dark:bg-sky-900 p-4 rounded-2xl shadow-2xl border border-sky-100 dark:border-sky-800 space-y-3 min-w-[200px] z-50">
           <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2">{title}: {label}</p>
           <div className="grid gap-2 max-h-48 overflow-y-auto no-scrollbar">
-            {payload.map((entry: any, index: number) => (
+            {payload.map((entry, index) => (
               <div key={index} className="flex justify-between items-center gap-4">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
@@ -259,8 +276,8 @@ export default function ChartsScreen({ history, settings }: { history: HistoryEn
     '#64748b'  // Slate
   ];
 
-  const monthlyItalianData = ITALIAN_MONTHS.map((month, idx) => {
-    const row: any = { month: month.substring(0, 3).toUpperCase() };
+  const monthlyItalianData = ITALIAN_MONTHS.map((month) => {
+    const row: MonthlyChartRow = { month: month.substring(0, 3).toUpperCase() };
     years.forEach(year => {
       const entry = history.find(e => {
         let eYear = e.year;
@@ -281,8 +298,8 @@ export default function ChartsScreen({ history, settings }: { history: HistoryEn
     return row;
   });
 
-  const monthlyTotalData = ITALIAN_MONTHS.map((month, idx) => {
-    const row: any = { month: month.substring(0, 3).toUpperCase() };
+  const monthlyTotalData = ITALIAN_MONTHS.map((month) => {
+    const row: MonthlyChartRow = { month: month.substring(0, 3).toUpperCase() };
     years.forEach(year => {
       const entry = history.find(e => {
         let eYear = e.year;
@@ -303,8 +320,8 @@ export default function ChartsScreen({ history, settings }: { history: HistoryEn
     return row;
   });
 
-  const monthlyCommissionData = ITALIAN_MONTHS.map((month, idx) => {
-    const row: any = { month: month.substring(0, 3).toUpperCase() };
+  const monthlyCommissionData = ITALIAN_MONTHS.map((month) => {
+    const row: MonthlyChartRow = { month: month.substring(0, 3).toUpperCase() };
     years.forEach(year => {
       const entry = history.find(e => {
         let eYear = e.year;

@@ -16,6 +16,16 @@ import {
   sumItalianTotal
 } from '../domain/commissions';
 
+interface TooltipPayloadEntry {
+  value: number;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadEntry[];
+  label?: string | number;
+}
+
 export default function HomeScreen({ hasData, records, settings, history, monthName, year, onLoadEntry }: { 
   hasData: boolean; 
   records: DDTRecord[]; 
@@ -252,7 +262,7 @@ export default function HomeScreen({ hasData, records, settings, history, monthN
     await triggerDownload(excelBlob, `Registro_Vendite_${monthName}_${year}.xlsx`);
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length >= 2) {
       return (
         <div className="bg-white dark:bg-sky-900 p-4 rounded-2xl shadow-2xl border border-sky-100 dark:border-sky-800 space-y-3 min-w-[180px]">
